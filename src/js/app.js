@@ -31,12 +31,13 @@ App = {
       App.contracts.Election.setProvider(App.web3Provider);
 
       App.listenForEvents();
+      App.listenForEvents2();
 
       return App.render();
     });
   },
 
-  // Listen for events emitted from the contract
+  /*// Listen for events emitted from the contract
   listenForEvents: function() {
     App.contracts.Election.deployed().then(function(instance) {
       // Restart Chrome if you are unable to receive this event
@@ -57,6 +58,40 @@ App = {
         console.log("RevocationEvent triggered", event)
         // Reload when a vote is revoked
         App.render();
+      });
+    });
+  },*/
+    // Listen for events emitted from the contract
+    listenForEvents: function() {
+      App.contracts.Election.deployed().then(function(instance) {
+        // Restart Chrome if you are unable to receive this event
+        // This is a known issue with Metamask
+        // https://github.com/MetaMask/metamask-extension/issues/2393
+        instance.votedEvent({}, {
+          fromBlock: 0,
+          toBlock: 'latest'
+        }).watch(function(error, event) {
+          console.log("event triggered", event)
+          // Reload when a new vote is recorded
+          App.render();
+          //location.reload(true)
+        });
+      });
+    },
+      // Listen for events emitted from the contract
+  listenForEvents2: function() {
+    App.contracts.Election.deployed().then(function(instance) {
+      // Restart Chrome if you are unable to receive this event
+      // This is a known issue with Metamask
+      // https://github.com/MetaMask/metamask-extension/issues/2393
+      instance.revocatedEvent({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+        console.log("RevocationEvent triggered", event)
+        // Reload when a vote is revoked
+        App.render();
+        //location.reload(true)
       });
     });
   },
@@ -88,7 +123,7 @@ App = {
       var candidatesSelect = $('#candidatesSelect');
       candidatesSelect.empty();
 
-      var candidatesSet = new Set();
+      //var candidatesSet = new Set();
 
       for (var i = 1; i <= candidatesCount; i++) {
         electionInstance.candidates(i).then(function(candidate) {
@@ -102,7 +137,7 @@ App = {
           
           candidatesResults.append(candidateTemplate);
 
-          //if ($('#candidatesSelect').find("option[value='" + id + "']").length == 0) {
+          //if (($('#candidatesSelect').find("option[value='" + id + "']").length == 0) {
           //  // Wenn nicht, fügen Sie die Option hinzu
           //  var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
 
