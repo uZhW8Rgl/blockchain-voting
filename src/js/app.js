@@ -14,7 +14,7 @@ App = {
       // If a web3 instance is already provided by Meta Mask.
       App.web3Provider = web3.currentProvider;
       web3 = new Web3(web3.currentProvider);
-      ethereum.enable().catch(console.error); // Add this line
+      ethereum.enable().catch(console.error);
     } else {
       // Specify default instance if no web3 instance provided
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
@@ -29,74 +29,36 @@ App = {
       App.contracts.Election = TruffleContract(election);
       // Connect provider to interact with contract
       App.contracts.Election.setProvider(App.web3Provider);
-
       App.listenForEvents();
-      App.listenForEvents2();
-
+      //App.listenForEvents2();
       return App.render();
     });
   },
 
-  /*// Listen for events emitted from the contract
   listenForEvents: function() {
     App.contracts.Election.deployed().then(function(instance) {
-      // Restart Chrome if you are unable to receive this event
-      // This is a known issue with Metamask
-      // https://github.com/MetaMask/metamask-extension/issues/2393
-      instance.votedEvent({}, {
-        fromBlock: 0,
-        toBlock: 'latest'
-      }).watch(function(error, event) {
-        console.log("event triggered", event)
-        // Reload when a new vote is recorded
-        App.render();
-      });
-      instance.revocatedEvent({}, {
-        fromBlock: 0,
-        toBlock: 'latest'
-      }).watch(function(error, event) {
-        console.log("RevocationEvent triggered", event)
-        // Reload when a vote is revoked
-        App.render();
-      });
-    });
-  },*/
-    // Listen for events emitted from the contract
-    listenForEvents: function() {
-      App.contracts.Election.deployed().then(function(instance) {
-        // Restart Chrome if you are unable to receive this event
-        // This is a known issue with Metamask
-        // https://github.com/MetaMask/metamask-extension/issues/2393
-        instance.votedEvent({}, {
-          fromBlock: 0,
+      web3.eth.getBlockNumber(function(error, latestBlockNumber) {
+        if (error) {
+          console.error("Could not fetch latest block number:", error);
+          return;
+        }
+        instance.allEvents({
+          fromBlock: 'latest',
           toBlock: 'latest'
         }).watch(function(error, event) {
-          console.log("event triggered", event)
-          // Reload when a new vote is recorded
-          App.render();
-          //location.reload(true)
+          if (!error) {
+            console.log("Event triggered", event);
+            App.render();
+          } else {
+            console.error(error);
+          }
         });
-      });
-    },
-      // Listen for events emitted from the contract
-  listenForEvents2: function() {
-    App.contracts.Election.deployed().then(function(instance) {
-      // Restart Chrome if you are unable to receive this event
-      // This is a known issue with Metamask
-      // https://github.com/MetaMask/metamask-extension/issues/2393
-      instance.revocatedEvent({}, {
-        fromBlock: 0,
-        toBlock: 'latest'
-      }).watch(function(error, event) {
-        console.log("RevocationEvent triggered", event)
-        // Reload when a vote is revoked
-        App.render();
-        //location.reload(true)
       });
     });
   },
 
   render: function() {
+
     var electionInstance;
     var loader = $("#loader");
     var content = $("#content");
@@ -104,7 +66,6 @@ App = {
     loader.show();
     content.hide();
 
-    // Load account data
     web3.eth.getCoinbase(function(err, account) {
       if (err === null) {
         App.account = account;
@@ -112,50 +73,55 @@ App = {
       }
     });
 
-    // Load contract data
+    App.contracts.Election.deployed().then(function(instance) {
+      var contractAddress = instance.address;
+      console.log("Contract Address: " + contractAddress);
+      var etherscanLink = "https://sepolia.etherscan.io/address/" + contractAddress;
+      console.log("Etherscan Link: " + etherscanLink);
+      $("#contractAddress").html("Contract Address: <a href='" + etherscanLink + "' target='_blank'>" + contractAddress + "</a>");
+    }).catch(function(error) {
+      console.error("Could not fetch contract address:", error);
+    });
+
     App.contracts.Election.deployed().then(function(instance) {
       electionInstance = instance;
       return electionInstance.candidatesCount();
     }).then(function(candidatesCount) {
       var candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
-
       var candidatesSelect = $('#candidatesSelect');
       candidatesSelect.empty();
-
-      //var candidatesSet = new Set();
-
+      candidates = new Set();
       for (var i = 1; i <= candidatesCount; i++) {
         electionInstance.candidates(i).then(function(candidate) {
           var id = candidate[0];
           var name = candidate[1];
           var voteCount = candidate[2];
-
-          // Render candidate Result
-          //var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-          var candidateTemplate = "<tr><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-          
-          candidatesResults.append(candidateTemplate);
-
-          //if (($('#candidatesSelect').find("option[value='" + id + "']").length == 0) {
-          //  // Wenn nicht, fügen Sie die Option hinzu
-          //  var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-
-          // Render candidate ballot option
-          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-          //var candidateOption = "<option value='' >" + name + "</ option>"
-          candidatesSelect.append(candidateOption);
+          candidates.add({
+            id: id,
+            name: name,
+            voteCount: voteCount
+          });
+          var sortedCandidates = Array.from(candidates).sort(function(a, b) {
+            return a.id - b.id;
+          });
+          candidatesResults.empty();
+          candidatesSelect.empty();
+          sortedCandidates.forEach(function(candidate) {
+            var candidateTemplate = "<tr><td>" + candidate.name + "</td><td>" + candidate.voteCount + "</td></tr>"
+            candidatesResults.append(candidateTemplate);
+            var candidateOption = "<option value='" + candidate.id + "' >" + candidate.name + "</ option>"
+            candidatesSelect.append(candidateOption);
+          });
         });
       }
       return electionInstance.voters(App.account);
     }).then(function(hasVoted) {
-      // Do not allow a user to revoke before voting
-      if(!hasVoted) {
+      if (!hasVoted) {
         $('#form2').hide();
         $('#form1').show();
       }
-      // Do not allow a user to vote
-      if(hasVoted) {
+      if (hasVoted) {
         $('#form1').hide();
         $('#form2').show();
       }
@@ -166,13 +132,13 @@ App = {
     });
   },
 
-
   castVote: function() {
     var candidateId = $('#candidatesSelect').val();
     App.contracts.Election.deployed().then(function(instance) {
-      return instance.vote(candidateId, { from: App.account });
+      return instance.vote(candidateId, {
+        from: App.account
+      });
     }).then(function(result) {
-      // Wait for votes to update
       $("#content").hide();
       $("#loader").show();
     }).catch(function(err) {
@@ -182,9 +148,10 @@ App = {
 
   revokeVote: function() {
     App.contracts.Election.deployed().then(function(instance) {
-      return instance.revokeVote({ from: App.account });
+      return instance.revokeVote({
+        from: App.account
+      });
     }).then(function(result) {
-      // Wait for votes to update
       $("#content").hide();
       $("#loader").show();
     }).catch(function(err) {
@@ -192,7 +159,6 @@ App = {
     });
   }
 };
-
 $(function() {
   $(window).load(function() {
     App.init();
