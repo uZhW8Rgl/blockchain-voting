@@ -22,12 +22,19 @@
       <div class="row">
         <div class="col-lg-12">
           <h1 class="text-center">Best Presentation Voting</h1>
+          <div>
+            <p id="accountAddress" class="text-center"></p>
+            <p class="text-center">Side note: you are free to change your vote any time. </p>
+          </div>
           <hr/>
-          <br/>
-          <div id="loader">
+          <!--<h6 class="text-center">If entries appear multiple times after a change,</h6>
+          <h6 class="text-center">or if you are stuck on the loading page while your MetaMask account is correct,</h6>
+          <h6 class="text-center">please refresh the browser manually.</h6>-->
+          <div id="loader1">
             <p class="text-center">Loading...</p>
           </div>
-          <div id="content" style="display: none;">
+          <div id="content1" style="display: none;">
+            <h2 class="text-center">Most Interesting Research</h2>
             <table class="table">
               <thead>
                 <tr>
@@ -36,24 +43,95 @@
                   <th scope="col">Votes</th>
                 </tr>
               </thead>
-              <tbody id="candidatesResults">
+              <tbody id="candidatesResults1">
               </tbody>
             </table>
             <hr/>
-            <form id="form1" onSubmit="App.castVote(); return false;">
+            <form id="form1" onSubmit="App.castVote1(); return false;">
               <div class="form-group">
-                <label for="candidatesSelect">Select Project</label>
-                <select class="form-control" id="candidatesSelect">
+                <label for="candidatesSelect1">Select Project</label>
+                <select class="form-control" id="candidatesSelect1">
                 </select>
               </div>
               <button type="submit" class="btn btn-primary">Vote</button>
               <hr />
             </form>
-            <form id="form2" onSubmit="App.revokeVote(); return false;">
+            <form id="form2" onSubmit="App.revokeVote1(); return false;">
               <button type="submit" class="text-center">Revoke Vote</button>
               <hr />
             </form>
-            <p id="accountAddress" class="text-center"></p>
+            <!--<p id="accountAddress" class="text-center"></p>-->
+            <p id="contractAddress1" class="text-center"></p>
+          </div>
+          <hr/>
+          <br/>
+          <div id="loader2">
+            <p class="text-center">Loading...</p>
+          </div>
+          <div id="content2" style="display: none;">
+            <h2 class="text-center">Most Entertaining Presentation</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <!--<th scope="col">#</th> -->
+                  <th scope="col">Project</th>
+                  <th scope="col">Votes</th>
+                </tr>
+              </thead>
+              <tbody id="candidatesResults2">
+              </tbody>
+            </table>
+            <hr/>
+            <form id="form3" onSubmit="App.castVote2(); return false;">
+              <div class="form-group">
+                <label for="candidatesSelect2">Select Project</label>
+                <select class="form-control" id="candidatesSelect2">
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Vote</button>
+              <hr />
+            </form>
+            <form id="form4" onSubmit="App.revokeVote2(); return false;">
+              <button type="submit" class="text-center">Revoke Vote</button>
+              <hr />
+            </form>
+            <!--<p id="accountAddress" class="text-center"></p>-->
+            <p id="contractAddress2" class="text-center"></p>
+          </div>
+          <hr/>
+          <br/>
+          <div id="loader3">
+            <p class="text-center">Loading...</p>
+          </div>
+          <div id="content3" style="display: none;">
+            <h2 class="text-center">Most Enticing Prototype</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <!--<th scope="col">#</th> -->
+                  <th scope="col">Project</th>
+                  <th scope="col">Votes</th>
+                </tr>
+              </thead>
+              <tbody id="candidatesResults3">
+              </tbody>
+            </table>
+            <hr/>
+            <form id="form5" onSubmit="App.castVote3(); return false;">
+              <div class="form-group">
+                <label for="candidatesSelect3">Select Project</label>
+                <select class="form-control" id="candidatesSelect3">
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Vote</button>
+              <hr />
+            </form>
+            <form id="form6" onSubmit="App.revokeVote3(); return false;">
+              <button type="submit" class="text-center">Revoke Vote</button>
+              <hr />
+            </form>
+            <!--<p id="accountAddress" class="text-center"></p>-->
+            <p id="contractAddress3" class="text-center"></p>
           </div>
         </div>
       </div>
